@@ -22,7 +22,7 @@ CHUNKS_PATH = os.path.join(os.path.dirname(__file__), "data", "chunks.pkl")
 COLLECTION_NAME = "python_docs"
 QDRANT_URL = "http://localhost:6333"
 EMBEDDING_MODEL = "embed-v4.0"
-EMBEDDING_DIM = 1024
+EMBEDDING_DIM = 1536
 
 
 # ---------------------------------------------------------------------------

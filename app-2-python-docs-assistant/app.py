@@ -99,16 +99,18 @@ def get_retriever() -> Retriever:
 
 def get_modules():
     try:
-        return get_retriever().get_available_modules()
+        modules = get_retriever().get_available_modules()
+        return gr.update(choices=modules, value=None)
     except Exception:
-        return []
+        return gr.update(choices=[], value=None)
 
 
 def get_doc_types():
     try:
-        return get_retriever().get_available_doc_types()
+        types = get_retriever().get_available_doc_types()
+        return gr.update(choices=types, value=None)
     except Exception:
-        return []
+        return gr.update(choices=[], value=None)
 
 
 def format_sources(chunks: list[RetrievedChunk]) -> str:
