@@ -54,6 +54,11 @@ def page_chat():
     st.caption("Мульти-индексный RAG по документации, коду и API Kubernetes")
 
     with st.sidebar:
+        st.subheader("Настройки")
+        top_k = st.slider("Top-K результатов", 1, 10, 5, key="top_k")
+        use_cache = st.checkbox("Семантический кэш", value=True, key="use_cache")
+
+        st.divider()
         st.header("Примеры запросов")
         examples = [
             "Что такое Pod в Kubernetes?",
@@ -62,15 +67,10 @@ def page_chat():
             "Какие поля есть в спецификации Pod?",
             "Как работает kubectl apply?",
         ]
+        selected_example = None
         for ex in examples:
             if st.button(ex, key=f"ex_{ex}", use_container_width=True):
-                st.session_state["chat_input"] = ex
-                st.rerun()
-
-        st.divider()
-        st.subheader("Настройки")
-        top_k = st.slider("Top-K результатов", 1, 10, 5, key="top_k")
-        use_cache = st.checkbox("Семантический кэш", value=True, key="use_cache")
+                selected_example = ex
 
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
@@ -81,10 +81,9 @@ def page_chat():
             if "metadata" in msg and msg["metadata"]:
                 _render_message_metadata(msg["metadata"])
 
-    default_input = st.session_state.pop("chat_input", "")
     user_input = st.chat_input("Задайте вопрос о Kubernetes...", key="chat_input_field")
 
-    query = user_input or default_input
+    query = user_input or selected_example
     if query:
         st.session_state["messages"].append({"role": "user", "content": query})
         with st.chat_message("user"):
@@ -153,12 +152,12 @@ def _render_message_metadata(metadata: dict):
     if sources:
         source_types = set()
         for s in sources:
-            st = s.get("source_type", "")
-            if st == "docs":
+            stype = s.get("source_type", "")
+            if stype == "docs":
                 source_types.add("🔵 docs")
-            elif st == "code":
+            elif stype == "code":
                 source_types.add("🟢 code")
-            elif st == "api":
+            elif stype == "api":
                 source_types.add("🟠 API")
         badge_cols[3].markdown(" ".join(source_types))
 

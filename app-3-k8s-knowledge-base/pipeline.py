@@ -82,9 +82,9 @@ def _check_cache(query_embedding: list[float]) -> dict | None:
         result = session.execute(
             text(
                 "SELECT id, original_query, response_text, sources_json, route_label, "
-                "1 - (query_embedding <=> :embedding::vector) as similarity "
+                "1 - (query_embedding <=> CAST(:embedding AS vector)) as similarity "
                 "FROM semantic_cache "
-                "ORDER BY query_embedding <=> :embedding::vector "
+                "ORDER BY query_embedding <=> CAST(:embedding AS vector) "
                 "LIMIT 1"
             ),
             {"embedding": str(query_embedding)},
@@ -287,8 +287,8 @@ def query_pipeline(query: str, top_k: int = 5, use_cache: bool = True) -> dict:
 
     response_text = response.text
 
-    input_tokens = response.raw.get("usage", {}).get("input_tokens", 0) if hasattr(response, "raw") and response.raw else 0
-    output_tokens = response.raw.get("usage", {}).get("output_tokens", 0) if hasattr(response, "raw") and response.raw else 0
+    input_tokens = getattr(getattr(response.raw, "usage", None), "input_tokens", 0) if hasattr(response, "raw") and response.raw else 0
+    output_tokens = getattr(getattr(response.raw, "usage", None), "output_tokens", 0) if hasattr(response, "raw") and response.raw else 0
 
     sources_for_display = [
         {
@@ -402,19 +402,18 @@ def query_pipeline_streaming(query: str, top_k: int = 5, use_cache: bool = True)
     prompt_text = SYNTHESIS_PROMPT.format(context_str=context, query_str=query)
 
     t0 = time.time()
-    full_response = ""
-    for token in llm.stream_complete(prompt_text):
-        delta = token.delta
-        full_response += delta
-        yield delta, None
+    response = llm.complete(prompt_text)
     latency_generation_ms = (time.time() - t0) * 1000
+    full_response = response.text
+    yield full_response, None
 
     input_tokens = 0
     output_tokens = 0
-    if hasattr(token, "raw") and token.raw:
-        usage = token.raw.get("usage", {})
-        input_tokens = usage.get("input_tokens", 0)
-        output_tokens = usage.get("output_tokens", 0)
+    if hasattr(response, "raw") and response.raw:
+        usage = getattr(response.raw, "usage", None)
+        if usage:
+            input_tokens = getattr(usage, "input_tokens", 0)
+            output_tokens = getattr(usage, "output_tokens", 0)
 
     sources_for_display = [
         {

@@ -11,7 +11,7 @@ EMBEDDING_DIM = 768
 LLM_MODEL = "claude-sonnet-4-20250514"
 
 POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
+POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5435"))
 POSTGRES_DB = os.getenv("POSTGRES_DB", "k8s_rag")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")

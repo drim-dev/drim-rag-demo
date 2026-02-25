@@ -40,17 +40,25 @@ def route_query(query: str) -> dict:
     llm = Anthropic(model=LLM_MODEL, api_key=ANTHROPIC_API_KEY, max_tokens=200)
 
     start = time.time()
-    response = llm.complete(ROUTING_PROMPT.format(query=query))
+    response = llm.complete(ROUTING_PROMPT.replace("{query}", query))
     latency_ms = (time.time() - start) * 1000
+
+    fallback = {
+        "indices": ["docs"],
+        "label": "docs",
+        "confidence": 0.5,
+        "latency_ms": latency_ms,
+    }
 
     try:
         result = json.loads(response.text.strip())
-        result["latency_ms"] = latency_ms
-        return result
-    except (json.JSONDecodeError, KeyError):
-        return {
-            "indices": ["docs"],
-            "label": "docs",
-            "confidence": 0.5,
-            "latency_ms": latency_ms,
-        }
+    except json.JSONDecodeError:
+        return fallback
+
+    if not isinstance(result, dict) or "indices" not in result or not result["indices"]:
+        return fallback
+
+    result.setdefault("label", "docs")
+    result.setdefault("confidence", 0.5)
+    result["latency_ms"] = latency_ms
+    return result

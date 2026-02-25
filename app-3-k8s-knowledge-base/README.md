@@ -60,7 +60,7 @@ docker compose up -d
 ```
 
 Это запустит:
-- PostgreSQL 16 с расширением pgvector (порт 5432)
+- PostgreSQL 16 с расширением pgvector (порт 5435)
 - Ollama для локальных эмбеддингов (порт 11434)
 - Автоматическую загрузку модели `nomic-embed-text`
 
