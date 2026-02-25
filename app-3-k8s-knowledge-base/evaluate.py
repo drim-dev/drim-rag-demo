@@ -6,11 +6,14 @@ import uuid
 from pathlib import Path
 
 from datasets import Dataset
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from ragas import evaluate
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from ragas.llms import LangchainLLMWrapper
 from ragas.metrics import (
     answer_relevancy,
     context_precision,
-    context_relevancy,
+    context_recall,
     faithfulness,
 )
 
@@ -73,26 +76,28 @@ def run_evaluation(progress_callback=None) -> dict:
         "ground_truth": ground_truths,
     })
 
+    ragas_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini", max_tokens=4096))
+    ragas_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
+
     ragas_result = evaluate(
         ds,
-        metrics=[faithfulness, answer_relevancy, context_relevancy, context_precision],
+        metrics=[faithfulness, answer_relevancy, context_recall, context_precision],
+        llm=ragas_llm,
+        embeddings=ragas_embeddings,
     )
 
-    avg_metrics = {
-        "faithfulness": float(ragas_result["faithfulness"]),
-        "answer_relevancy": float(ragas_result["answer_relevancy"]),
-        "context_relevancy": float(ragas_result["context_relevancy"]),
-        "context_precision": float(ragas_result["context_precision"]),
-    }
+    df = ragas_result.to_pandas()
 
-    if hasattr(ragas_result, "to_pandas"):
-        df = ragas_result.to_pandas()
-        for i, row in df.iterrows():
-            if i < len(per_question):
-                per_question[i]["faithfulness"] = float(row.get("faithfulness", 0))
-                per_question[i]["answer_relevancy"] = float(row.get("answer_relevancy", 0))
-                per_question[i]["context_relevancy"] = float(row.get("context_relevancy", 0))
-                per_question[i]["context_precision"] = float(row.get("context_precision", 0))
+    metric_names = ["faithfulness", "answer_relevancy", "context_recall", "context_precision"]
+    avg_metrics = {}
+    for m in metric_names:
+        values = df[m].dropna()
+        avg_metrics[m] = float(values.mean()) if len(values) > 0 else 0.0
+
+    for i, row in df.iterrows():
+        if i < len(per_question):
+            for m in metric_names:
+                per_question[i][m] = float(row.get(m, 0) or 0)
 
     session = get_session()
     try:
@@ -101,7 +106,7 @@ def run_evaluation(progress_callback=None) -> dict:
                 run_id=run_id,
                 avg_faithfulness=avg_metrics["faithfulness"],
                 avg_answer_relevancy=avg_metrics["answer_relevancy"],
-                avg_context_relevancy=avg_metrics["context_relevancy"],
+                avg_context_recall=avg_metrics["context_recall"],
                 avg_context_precision=avg_metrics["context_precision"],
                 per_question_json=json.dumps(per_question, default=str),
             )
@@ -132,7 +137,7 @@ def get_evaluation_history() -> list[dict]:
                 "timestamp": r.timestamp.isoformat() if r.timestamp else "",
                 "faithfulness": r.avg_faithfulness,
                 "answer_relevancy": r.avg_answer_relevancy,
-                "context_relevancy": r.avg_context_relevancy,
+                "context_recall": r.avg_context_recall,
                 "context_precision": r.avg_context_precision,
                 "per_question": r.get_per_question_results(),
             }

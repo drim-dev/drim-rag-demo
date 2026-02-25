@@ -58,20 +58,6 @@ def page_chat():
         top_k = st.slider("Top-K результатов", 1, 10, 5, key="top_k")
         use_cache = st.checkbox("Семантический кэш", value=True, key="use_cache")
 
-        st.divider()
-        st.header("Примеры запросов")
-        examples = [
-            "Что такое Pod в Kubernetes?",
-            "Чем Deployment отличается от StatefulSet?",
-            "Как реализован цикл планировщика?",
-            "Какие поля есть в спецификации Pod?",
-            "Как работает kubectl apply?",
-        ]
-        selected_example = None
-        for ex in examples:
-            if st.button(ex, key=f"ex_{ex}", use_container_width=True):
-                selected_example = ex
-
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
@@ -83,7 +69,7 @@ def page_chat():
 
     user_input = st.chat_input("Задайте вопрос о Kubernetes...", key="chat_input_field")
 
-    query = user_input or selected_example
+    query = user_input
     if query:
         st.session_state["messages"].append({"role": "user", "content": query})
         with st.chat_message("user"):
@@ -406,7 +392,7 @@ def _render_evaluation_results(results: dict):
     metric_names = [
         ("faithfulness", "Faithfulness"),
         ("answer_relevancy", "Answer Relevancy"),
-        ("context_relevancy", "Context Relevancy"),
+        ("context_recall", "Context Recall"),
         ("context_precision", "Context Precision"),
     ]
 
@@ -424,7 +410,7 @@ def _render_evaluation_results(results: dict):
                 pcols[0].caption(f"Маршрут: {q.get('actual_route', '—')}")
                 pcols[1].caption(f"Faith: {q.get('faithfulness', 0):.2f}")
                 pcols[2].caption(f"Ans Rel: {q.get('answer_relevancy', 0):.2f}")
-                pcols[3].caption(f"Ctx Rel: {q.get('context_relevancy', 0):.2f}")
+                pcols[3].caption(f"Ctx Rec: {q.get('context_recall', 0):.2f}")
                 pcols[4].caption(f"Ctx Prec: {q.get('context_precision', 0):.2f}")
                 if q.get("answer_preview"):
                     st.text(q["answer_preview"])
@@ -446,14 +432,14 @@ def _render_history_tab():
         "run": [],
         "faithfulness": [],
         "answer_relevancy": [],
-        "context_relevancy": [],
+        "context_recall": [],
         "context_precision": [],
     }
     for run in reversed(history):
         chart_data["run"].append(run["run_id"][:6])
         chart_data["faithfulness"].append(run["faithfulness"])
         chart_data["answer_relevancy"].append(run["answer_relevancy"])
-        chart_data["context_relevancy"].append(run["context_relevancy"])
+        chart_data["context_recall"].append(run["context_recall"])
         chart_data["context_precision"].append(run["context_precision"])
 
     import pandas as pd
@@ -465,7 +451,7 @@ def _render_history_tab():
             cols = st.columns(4)
             cols[0].metric("Faithfulness", f"{run['faithfulness']:.3f}")
             cols[1].metric("Answer Rel.", f"{run['answer_relevancy']:.3f}")
-            cols[2].metric("Context Rel.", f"{run['context_relevancy']:.3f}")
+            cols[2].metric("Context Rec.", f"{run['context_recall']:.3f}")
             cols[3].metric("Context Prec.", f"{run['context_precision']:.3f}")
 
 

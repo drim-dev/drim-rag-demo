@@ -23,7 +23,6 @@ from config import (
     EMBEDDING_DIM,
     EMBEDDING_MODEL,
     LLM_MODEL,
-    MIN_RELEVANCE_SCORE,
     OLLAMA_HOST,
     POSTGRES_DB,
     POSTGRES_HOST,
@@ -144,7 +143,7 @@ def _search_index(index_name: str, query: str, embed_model, top_k: int = 5) -> l
                 "source_type": node.node.metadata.get("source_type", "unknown"),
             }
             for node in nodes
-            if node.score is not None and node.score >= MIN_RELEVANCE_SCORE
+            if node.score is not None
         ]
     except Exception as e:
         print(f"Search error on {index_name}: {e}")

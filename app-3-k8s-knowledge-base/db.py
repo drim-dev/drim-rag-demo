@@ -57,7 +57,7 @@ class EvaluationRun(Base):
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     avg_faithfulness = Column(Float, default=0)
     avg_answer_relevancy = Column(Float, default=0)
-    avg_context_relevancy = Column(Float, default=0)
+    avg_context_recall = Column(Float, default=0)
     avg_context_precision = Column(Float, default=0)
     per_question_json = Column(Text, default="{}")
 
