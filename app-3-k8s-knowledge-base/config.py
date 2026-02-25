@@ -30,6 +30,9 @@ COST_PER_OUTPUT_TOKEN = 15.0 / 1_000_000
 # Semantic cache similarity threshold
 CACHE_SIMILARITY_THRESHOLD = 0.95
 
+# Minimum relevance score for retrieved chunks
+MIN_RELEVANCE_SCORE = 0.6
+
 # Index collection names
 DOCS_INDEX = "docs_index"
 CODE_INDEX = "code_index"

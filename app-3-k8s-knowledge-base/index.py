@@ -125,10 +125,13 @@ def build_index(documents: list[Document], collection_name: str) -> int:
     vector_store = get_vector_store(collection_name)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
+    node_parser = SentenceSplitter(chunk_size=1024, chunk_overlap=100)
+
     index = VectorStoreIndex.from_documents(
         documents,
         storage_context=storage_context,
         embed_model=embed_model,
+        transformations=[node_parser],
         show_progress=True,
     )
     return len(documents)
