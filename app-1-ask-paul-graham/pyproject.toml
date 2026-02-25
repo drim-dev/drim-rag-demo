@@ -1,0 +1,16 @@
+[project]
+name = "ask-paul-graham"
+version = "0.1.0"
+description = "RAG app for querying Paul Graham's essays"
+requires-python = ">=3.11"
+dependencies = [
+    "llama-index",
+    "llama-index-llms-openai",
+    "llama-index-embeddings-openai",
+    "qdrant-client",
+    "llama-index-vector-stores-qdrant",
+    "streamlit",
+    "python-dotenv",
+    "requests",
+    "beautifulsoup4",
+]

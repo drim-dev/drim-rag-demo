@@ -1,0 +1,6 @@
+.env
+data/essays/
+data/qdrant/
+__pycache__/
+*.pyc
+.venv/

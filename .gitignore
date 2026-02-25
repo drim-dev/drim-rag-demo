@@ -1,0 +1,25 @@
+# Data directories
+data/
+
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Vector stores
+.chroma/
+.qdrant_data/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store

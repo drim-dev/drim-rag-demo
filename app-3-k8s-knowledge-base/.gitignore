@@ -1,0 +1,6 @@
+data/k8s-docs/
+data/k8s-code/
+data/k8s-api-specs/
+.env
+__pycache__/
+*.pyc

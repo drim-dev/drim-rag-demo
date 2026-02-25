@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: k8s_rag
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  ollama-pull:
+    image: ollama/ollama
+    depends_on:
+      - ollama
+    entrypoint: >
+      sh -c "sleep 5 && ollama pull nomic-embed-text"
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+
+volumes:
+  pgdata:
+  ollama_data:

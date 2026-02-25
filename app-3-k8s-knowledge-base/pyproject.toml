@@ -1,0 +1,20 @@
+[project]
+name = "k8s-knowledge-base"
+version = "0.1.0"
+description = "Multi-index RAG app for Kubernetes with evaluation and monitoring"
+requires-python = ">=3.11"
+dependencies = [
+    "llama-index>=0.11",
+    "llama-index-llms-anthropic>=0.4",
+    "llama-index-vector-stores-postgres>=0.3",
+    "llama-index-embeddings-ollama>=0.4",
+    "llama-index-embeddings-huggingface>=0.4",
+    "psycopg2-binary>=2.9",
+    "sqlalchemy>=2.0",
+    "ragas>=0.2",
+    "streamlit>=1.39",
+    "python-dotenv>=1.0",
+    "tree-sitter>=0.23",
+    "tree-sitter-go>=0.23",
+    "datasets>=3.0",
+]

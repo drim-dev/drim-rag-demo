@@ -1,0 +1,5 @@
+data/python-docs/
+data/*.pkl
+.env
+__pycache__/
+*.pyc
